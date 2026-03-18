@@ -520,22 +520,22 @@ async function runTests() {
     assert(result.isError === true, "Expected error for nonexistent package");
   });
 
-  // --- adb_app_intents ---
-  console.log("\n── adb_app_intents ──");
+  // --- adb_app_actions ---
+  console.log("\n── adb_app_actions ──");
 
   await test("returns intents for installed app", async () => {
-    const result = await callTool("adb_app_intents", {
+    const result = await callTool("adb_app_actions", {
       packageName: "com.android.settings",
       deviceId,
     });
     const text = getTextContent(result);
     assert(!result.isError, `Error: ${text}`);
-    assert(text.includes("Activities"), "Expected activities section");
-    assert(text.includes("android."), "Expected android intent actions");
+    assert(text.includes("Non-Data Actions:"), "Expected non-data actions section");
+    assert(text.includes("android.intent.action."), "Expected android intent actions");
   });
 
   await test("returns error for nonexistent package intents", async () => {
-    const result = await callTool("adb_app_intents", {
+    const result = await callTool("adb_app_actions", {
       packageName: "com.fake.nonexistent.app.xyz",
       deviceId,
     });

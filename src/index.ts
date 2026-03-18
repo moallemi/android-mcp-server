@@ -14,7 +14,7 @@ import { handleAdbAppInfo } from "./tools/adb-app-info.js";
 import { handleAdbUninstall } from "./tools/adb-uninstall.js";
 import { handleAdbTap } from "./tools/adb-tap.js";
 import { handleAdbFindAndTap, handleAdbGetUiElements } from "./tools/adb-ui.js";
-import { handleAdbAppIntents } from "./tools/adb-intents.js";
+import { handleAdbAppActions } from "./tools/adb-intents.js";
 import { getConnectedDevices } from "./core/device-manager.js";
 import { logger } from "./utils/logger.js";
 
@@ -101,13 +101,13 @@ server.tool(
 );
 
 server.tool(
-  "adb_app_intents",
-  "Get all registered intents (activities, services, receivers) for an installed app. Useful for discovering deep links and launchable actions.",
+  "adb_app_actions",
+  "Get all registered actions for an installed app — activities, services, and receivers with their full intent filters (schemes, categories, authorities, deep links). Useful for discovering how to launch specific screens or trigger app functionality.",
   {
     packageName: z.string().describe("App package name (e.g., com.example.app)"),
     deviceId: z.string().optional().describe("Target device serial"),
   },
-  async (args) => handleAdbAppIntents(args)
+  async (args) => handleAdbAppActions(args)
 );
 
 server.tool(
