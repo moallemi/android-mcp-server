@@ -37,18 +37,33 @@ export async function handleAdbScreenshot(args: {
       };
     }
 
-    // Clean up remote file
-    await executeAdb({
-      command: `shell rm ${remotePath}`,
-      deviceId,
-      timeout: 5000,
-    }).catch(() => { /* best effort cleanup */ });
+    // Clean up remote file and get screen resolution in parallel
+    const [, sizeResult] = await Promise.all([
+      executeAdb({
+        command: `shell rm ${remotePath}`,
+        deviceId,
+        timeout: 5000,
+      }).catch(() => { /* best effort cleanup */ }),
+      executeAdb({
+        command: "shell wm size",
+        deviceId,
+        timeout: 5000,
+      }).catch(() => null),
+    ]);
+
+    let resolutionInfo = "";
+    if (sizeResult && sizeResult.exitCode === 0) {
+      const match = sizeResult.stdout.match(/(\d+)x(\d+)/);
+      if (match) {
+        resolutionInfo = `\nDevice screen resolution: ${match[1]}x${match[2]} pixels\nIMPORTANT: Use these dimensions for any \`input tap\` coordinates — the screenshot image may be scaled down from the actual device resolution.`;
+      }
+    }
 
     return {
       content: [
         {
           type: "text",
-          text: `Screenshot saved to: ${savePath}\n\n${pull.stdout.trim()}`,
+          text: `Screenshot saved to: ${savePath}\n\n${pull.stdout.trim()}${resolutionInfo}`,
         },
       ],
     };

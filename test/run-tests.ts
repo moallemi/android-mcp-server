@@ -320,9 +320,37 @@ async function runTests() {
     const text = getTextContent(result);
     assert(!result.isError, `Error: ${text}`);
     assert(existsSync(screenshotPath), "Screenshot file not created");
+    assert(text.includes("Device screen resolution:"), "Missing device resolution in response");
 
     // Clean up
     unlinkSync(screenshotPath);
+  });
+
+  // --- adb_tap ---
+  console.log("\n── adb_tap ──");
+
+  await test("tap with direct device coordinates", async () => {
+    const result = await callTool("adb_tap", {
+      x: 540,
+      y: 1212,
+      deviceId,
+    });
+    const text = getTextContent(result);
+    assert(!result.isError, `Error: ${text}`);
+    assert(text.includes("Tapped at (540, 1212)"), `Unexpected output: ${text}`);
+  });
+
+  await test("tap with auto-scaling from screenshot dimensions", async () => {
+    const result = await callTool("adb_tap", {
+      x: 100,
+      y: 200,
+      deviceId,
+      screenshotWidth: 540,
+      screenshotHeight: 1212,
+    });
+    const text = getTextContent(result);
+    assert(!result.isError, `Error: ${text}`);
+    assert(text.includes("Scaled from"), `Expected scaling info, got: ${text}`);
   });
 
   // --- adb_file_transfer ---

@@ -12,6 +12,7 @@ import { handleAdbScreenshot } from "./tools/adb-screenshot.js";
 import { handleAdbFileTransfer } from "./tools/adb-file-transfer.js";
 import { handleAdbAppInfo } from "./tools/adb-app-info.js";
 import { handleAdbUninstall } from "./tools/adb-uninstall.js";
+import { handleAdbTap } from "./tools/adb-tap.js";
 import { getConnectedDevices } from "./core/device-manager.js";
 import { logger } from "./utils/logger.js";
 
@@ -105,6 +106,19 @@ server.tool(
     keepData: z.boolean().optional().describe("Keep app data and cache after uninstall. Default: false."),
   },
   async (args) => handleAdbUninstall(args)
+);
+
+server.tool(
+  "adb_tap",
+  "Tap on a screen coordinate. If you provide screenshotWidth/screenshotHeight (the dimensions of a screenshot image you're looking at), the tool auto-scales coordinates to the actual device resolution. This avoids the common problem of tapping wrong coordinates when the screenshot is scaled down.",
+  {
+    x: z.number().describe("X coordinate to tap"),
+    y: z.number().describe("Y coordinate to tap"),
+    deviceId: z.string().optional().describe("Target device serial"),
+    screenshotWidth: z.number().optional().describe("Width of the screenshot image you estimated coordinates from. If provided with screenshotHeight, coordinates are auto-scaled to device resolution."),
+    screenshotHeight: z.number().optional().describe("Height of the screenshot image you estimated coordinates from."),
+  },
+  async (args) => handleAdbTap(args)
 );
 
 // --- Resources ---
