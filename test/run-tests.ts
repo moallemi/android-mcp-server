@@ -326,6 +326,37 @@ async function runTests() {
     unlinkSync(screenshotPath);
   });
 
+  // --- adb_find_and_tap / adb_get_ui_elements ---
+  console.log("\n── adb_ui ──");
+
+  await test("get_ui_elements lists visible elements", async () => {
+    // Open Settings to ensure there are UI elements on screen
+    await callTool("adb_command", {
+      command: "shell am start -a android.settings.SETTINGS",
+      deviceId,
+    });
+    await new Promise((r) => setTimeout(r, 3000));
+
+    const result = await callTool("adb_get_ui_elements", { deviceId });
+    const text = getTextContent(result);
+    assert(!result.isError, `Error: ${text}`);
+    assert(text.includes("Found"), `Expected element list, got: ${text}`);
+  });
+
+  await test("find_and_tap errors when no search criteria given", async () => {
+    const result = await callTool("adb_find_and_tap", { deviceId });
+    assert(result.isError === true, "Expected error with no criteria");
+  });
+
+  await test("find_and_tap errors for nonexistent element", async () => {
+    const result = await callTool("adb_find_and_tap", {
+      text: "zzz_nonexistent_element_xyz_12345",
+      deviceId,
+    });
+    assert(result.isError === true, "Expected error for missing element");
+    assert(getTextContent(result).includes("No element found"), "Expected not-found message");
+  });
+
   // --- adb_tap ---
   console.log("\n── adb_tap ──");
 

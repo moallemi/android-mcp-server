@@ -13,6 +13,7 @@ import { handleAdbFileTransfer } from "./tools/adb-file-transfer.js";
 import { handleAdbAppInfo } from "./tools/adb-app-info.js";
 import { handleAdbUninstall } from "./tools/adb-uninstall.js";
 import { handleAdbTap } from "./tools/adb-tap.js";
+import { handleAdbFindAndTap, handleAdbGetUiElements } from "./tools/adb-ui.js";
 import { getConnectedDevices } from "./core/device-manager.js";
 import { logger } from "./utils/logger.js";
 
@@ -106,6 +107,33 @@ server.tool(
     keepData: z.boolean().optional().describe("Keep app data and cache after uninstall. Default: false."),
   },
   async (args) => handleAdbUninstall(args)
+);
+
+server.tool(
+  "adb_find_and_tap",
+  "Find a UI element on screen by text, resource ID, or content description and tap on it. Uses Android's uiautomator to inspect the view hierarchy — no screenshot needed. Perfect for clicking buttons, links, or any visible element by its label.",
+  {
+    text: z.string().optional().describe("Text content of the element to tap (substring match)"),
+    resourceId: z.string().optional().describe("Resource ID to match (e.g., 'com.example:id/button')"),
+    contentDesc: z.string().optional().describe("Content description / accessibility label to match"),
+    className: z.string().optional().describe("Class name to match (e.g., 'android.widget.Button')"),
+    deviceId: z.string().optional().describe("Target device serial"),
+  },
+  async (args) => handleAdbFindAndTap(args)
+);
+
+server.tool(
+  "adb_get_ui_elements",
+  "List UI elements currently visible on screen. Uses Android's uiautomator to dump the view hierarchy. Filter by text, resource ID, content description, or class name. Use this to discover what's on screen before interacting.",
+  {
+    text: z.string().optional().describe("Filter by text content (substring match)"),
+    resourceId: z.string().optional().describe("Filter by resource ID"),
+    contentDesc: z.string().optional().describe("Filter by content description"),
+    className: z.string().optional().describe("Filter by class name"),
+    clickableOnly: z.boolean().optional().describe("Only return clickable elements. Default: false."),
+    deviceId: z.string().optional().describe("Target device serial"),
+  },
+  async (args) => handleAdbGetUiElements(args)
 );
 
 server.tool(
