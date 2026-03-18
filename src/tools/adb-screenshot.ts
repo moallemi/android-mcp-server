@@ -1,12 +1,20 @@
+import { readFileSync, unlinkSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { executeAdb } from "../core/adb-executor.js";
+
+type ContentItem =
+  | { type: "text"; text: string }
+  | { type: "image"; data: string; mimeType: "image/png" };
 
 export async function handleAdbScreenshot(args: {
   deviceId?: string;
   savePath?: string;
-}): Promise<{ content: Array<{ type: "text"; text: string }>; isError?: boolean }> {
-  const { deviceId } = args;
-  const savePath = args.savePath || `./screenshot_${Date.now()}.png`;
+}): Promise<{ content: ContentItem[]; isError?: boolean }> {
+  const { deviceId, savePath } = args;
   const remotePath = "/sdcard/adb_mcp_screenshot.png";
+  // Always pull to a temp file first for base64 encoding
+  const tempPath = join(tmpdir(), `adb_mcp_screenshot_${Date.now()}.png`);
 
   try {
     // Capture screenshot on device
@@ -23,9 +31,10 @@ export async function handleAdbScreenshot(args: {
       };
     }
 
-    // Pull to local
+    // Pull to temp path
+    const pullTarget = savePath || tempPath;
     const pull = await executeAdb({
-      command: `pull ${remotePath} ${savePath}`,
+      command: `pull ${remotePath} ${pullTarget}`,
       deviceId,
       timeout: 15000,
     });
@@ -37,13 +46,17 @@ export async function handleAdbScreenshot(args: {
       };
     }
 
+    // Read the file and encode as base64
+    const imageBuffer = readFileSync(pullTarget);
+    const base64Image = imageBuffer.toString("base64");
+
     // Clean up remote file and get screen resolution in parallel
     const [, sizeResult] = await Promise.all([
       executeAdb({
         command: `shell rm ${remotePath}`,
         deviceId,
         timeout: 5000,
-      }).catch(() => { /* best effort cleanup */ }),
+      }).catch(() => {}),
       executeAdb({
         command: "shell wm size",
         deviceId,
@@ -51,22 +64,28 @@ export async function handleAdbScreenshot(args: {
       }).catch(() => null),
     ]);
 
+    // Clean up temp file if no savePath was requested
+    if (!savePath && existsSync(tempPath)) {
+      unlinkSync(tempPath);
+    }
+
     let resolutionInfo = "";
     if (sizeResult && sizeResult.exitCode === 0) {
       const match = sizeResult.stdout.match(/(\d+)x(\d+)/);
       if (match) {
-        resolutionInfo = `\nDevice screen resolution: ${match[1]}x${match[2]} pixels\nIMPORTANT: Use these dimensions for any \`input tap\` coordinates — the screenshot image may be scaled down from the actual device resolution.`;
+        resolutionInfo = `\nDevice screen resolution: ${match[1]}x${match[2]} pixels\nIMPORTANT: Use these pixel dimensions for any \`input tap\` or \`adb_tap\` coordinates — the screenshot image may be scaled down from the actual device resolution.`;
       }
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Screenshot saved to: ${savePath}\n\n${pull.stdout.trim()}${resolutionInfo}`,
-        },
-      ],
-    };
+    const content: ContentItem[] = [
+      { type: "image", data: base64Image, mimeType: "image/png" },
+      {
+        type: "text",
+        text: `${savePath ? `Screenshot saved to: ${savePath}\n` : ""}${resolutionInfo}`,
+      },
+    ];
+
+    return { content };
   } catch (err) {
     return {
       content: [

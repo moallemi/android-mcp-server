@@ -309,18 +309,26 @@ async function runTests() {
 
   const screenshotPath = resolve(import.meta.dirname, "../test-screenshot.png");
 
-  await test("captures and saves screenshot", async () => {
-    // Clean up first
+  await test("captures and returns inline base64 image", async () => {
+    const result = await callTool("adb_screenshot", { deviceId });
+    assert(!result.isError, `Error: ${getTextContent(result)}`);
+    const imageContent = result.content?.find((c: any) => c.type === "image");
+    assert(imageContent, "Missing image content block in response");
+    assert(imageContent.mimeType === "image/png", `Expected image/png, got ${imageContent.mimeType}`);
+    assert(imageContent.data.length > 100, "Base64 data too short — likely not a real image");
+    const textContent = result.content?.find((c: any) => c.type === "text");
+    assert(textContent?.text?.includes("Device screen resolution:"), "Missing resolution info");
+  });
+
+  await test("saves to file when savePath provided", async () => {
     if (existsSync(screenshotPath)) unlinkSync(screenshotPath);
 
     const result = await callTool("adb_screenshot", {
       deviceId,
       savePath: screenshotPath,
     });
-    const text = getTextContent(result);
-    assert(!result.isError, `Error: ${text}`);
+    assert(!result.isError, `Error: ${getTextContent(result)}`);
     assert(existsSync(screenshotPath), "Screenshot file not created");
-    assert(text.includes("Device screen resolution:"), "Missing device resolution in response");
 
     // Clean up
     unlinkSync(screenshotPath);
