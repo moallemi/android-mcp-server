@@ -20,19 +20,16 @@ export async function handleAdbAppInfo(args: {
       }),
     ]);
 
-    if (dumpResult.exitCode !== 0 || !dumpResult.stdout.includes("Package [")) {
-      // Check if the package was not found at all
-      if (!dumpResult.stdout.includes(packageName)) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Package "${packageName}" not found on device. Use \`adb shell pm list packages\` to list installed packages.`,
-            },
-          ],
-          isError: true,
-        };
-      }
+    if (!dumpResult.stdout.includes(`Package [${packageName}]`)) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Package "${packageName}" not found on device. Use \`adb shell pm list packages\` to list installed packages.`,
+          },
+        ],
+        isError: true,
+      };
     }
 
     const dump = dumpResult.stdout;

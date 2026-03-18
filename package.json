@@ -10,9 +10,15 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "npx tsx test/run-tests.ts"
   },
-  "keywords": ["mcp", "adb", "android", "debug"],
+  "keywords": [
+    "mcp",
+    "adb",
+    "android",
+    "debug"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=18"
@@ -21,7 +27,8 @@
     "@modelcontextprotocol/sdk": "^1.12.1"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
   }
 }
