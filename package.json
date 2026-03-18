@@ -1,0 +1,27 @@
+{
+  "name": "android-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server exposing Android Debug Bridge (ADB) to AI assistants",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "adb-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["mcp", "adb", "android", "debug"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  }
+}
