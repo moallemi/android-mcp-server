@@ -2,5 +2,8 @@ node_modules/
 dist/
 *.tsbuildinfo
 .DS_Store
+.idea/
+*.iml
+*.iws
 .claude/settings.local.json
 docs/adb-mcp-server-spec.md

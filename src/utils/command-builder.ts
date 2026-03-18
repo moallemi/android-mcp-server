@@ -1,3 +1,5 @@
+import { getAdbPath } from "./adb-path.js";
+
 /**
  * Tokenize a command string into arguments, respecting quotes.
  * e.g., `shell echo "hello world"` → ["shell", "echo", "hello world"]
@@ -71,7 +73,7 @@ export function buildFullCommandString(
   command: string,
   deviceId?: string
 ): string {
-  const adbPath = process.env.ADB_PATH || "adb";
+  const adbPath = getAdbPath();
   const parts = [adbPath];
   if (deviceId) {
     parts.push("-s", deviceId);

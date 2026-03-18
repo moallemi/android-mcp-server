@@ -1,6 +1,7 @@
 import { spawn, ChildProcess } from "node:child_process";
 import { AdbStreamOptions, AdbStreamResult } from "../types/index.js";
 import { buildAdbArgs, buildFullCommandString } from "../utils/command-builder.js";
+import { getAdbPath } from "../utils/adb-path.js";
 import { logger } from "../utils/logger.js";
 
 const DEFAULT_DURATION = 10000;
@@ -20,7 +21,7 @@ export async function streamAdb(options: AdbStreamOptions): Promise<AdbStreamRes
   const effectiveDuration = Math.min(durationMs, MAX_DURATION);
   const effectiveMaxLines = Math.min(maxLines, MAX_MAX_LINES);
 
-  const adbPath = process.env.ADB_PATH || "adb";
+  const adbPath = getAdbPath();
   const args = buildAdbArgs(command, deviceId);
   const fullCommand = buildFullCommandString(command, deviceId);
 

@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { AdbExecOptions, AdbExecResult } from "../types/index.js";
 import { buildAdbArgs, buildFullCommandString } from "../utils/command-builder.js";
+import { getAdbPath } from "../utils/adb-path.js";
 import { logger } from "../utils/logger.js";
 
 const DEFAULT_TIMEOUT = parseInt(process.env.ADB_DEFAULT_TIMEOUT || "30000", 10);
@@ -14,7 +15,7 @@ export async function executeAdb(options: AdbExecOptions): Promise<AdbExecResult
     signal,
   } = options;
 
-  const adbPath = process.env.ADB_PATH || "adb";
+  const adbPath = getAdbPath();
   const args = buildAdbArgs(command, deviceId);
   const fullCommand = buildFullCommandString(command, deviceId);
 
