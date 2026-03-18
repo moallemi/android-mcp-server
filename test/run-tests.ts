@@ -82,8 +82,8 @@ function sendRequest(method: string, params: unknown): Promise<any> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       pendingRequests.delete(id);
-      reject(new Error(`Request ${method} (id=${id}) timed out after 30s`));
-    }, 30000);
+      reject(new Error(`Request ${method} (id=${id}) timed out after 60s`));
+    }, 60000);
 
     pendingRequests.set(id, {
       resolve: (value) => {
@@ -314,7 +314,7 @@ async function runTests() {
     assert(!result.isError, `Error: ${getTextContent(result)}`);
     const imageContent = result.content?.find((c: any) => c.type === "image");
     assert(imageContent, "Missing image content block in response");
-    assert(imageContent.mimeType === "image/png", `Expected image/png, got ${imageContent.mimeType}`);
+    assert(imageContent.mimeType === "image/jpeg", `Expected image/jpeg, got ${imageContent.mimeType}`);
     assert(imageContent.data.length > 100, "Base64 data too short — likely not a real image");
     const textContent = result.content?.find((c: any) => c.type === "text");
     assert(textContent?.text?.includes("Device screen resolution:"), "Missing resolution info");

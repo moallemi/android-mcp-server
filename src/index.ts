@@ -68,10 +68,11 @@ server.tool(
 
 server.tool(
   "adb_screenshot",
-  "Capture a screenshot from the device screen and save it locally.",
+  "Capture a screenshot from the device screen. Returns the image inline (compressed by default for fast transfer). Use savePath to also save the full-resolution file locally.",
   {
     deviceId: z.string().optional().describe("Target device serial"),
-    savePath: z.string().optional().describe("Local path to save the screenshot. Default: ./screenshot_<timestamp>.png"),
+    savePath: z.string().optional().describe("Local path to also save the full-resolution screenshot"),
+    fullResolution: z.boolean().optional().describe("Return full-resolution PNG instead of compressed JPEG. Warning: may exceed size limits on some clients. Default: false."),
   },
   async (args) => handleAdbScreenshot(args)
 );
