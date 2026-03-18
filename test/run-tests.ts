@@ -419,6 +419,18 @@ async function runTests() {
     assert(getTextContent(result).includes("not found"), "Expected file-not-found message");
   });
 
+  // --- adb_uninstall ---
+  console.log("\n── adb_uninstall ──");
+
+  await test("returns error for nonexistent package uninstall", async () => {
+    const result = await callTool("adb_uninstall", {
+      packageName: "com.fake.nonexistent.app.xyz",
+      deviceId,
+    });
+    assert(result.isError === true, "Expected error for nonexistent package");
+    assert(getTextContent(result).includes("may not be installed"), "Expected not-installed message");
+  });
+
   // --- adb_app_info ---
   console.log("\n── adb_app_info ──");
 

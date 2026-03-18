@@ -11,6 +11,7 @@ import { handleAdbInstall } from "./tools/adb-install.js";
 import { handleAdbScreenshot } from "./tools/adb-screenshot.js";
 import { handleAdbFileTransfer } from "./tools/adb-file-transfer.js";
 import { handleAdbAppInfo } from "./tools/adb-app-info.js";
+import { handleAdbUninstall } from "./tools/adb-uninstall.js";
 import { getConnectedDevices } from "./core/device-manager.js";
 import { logger } from "./utils/logger.js";
 
@@ -93,6 +94,17 @@ server.tool(
     deviceId: z.string().optional().describe("Target device serial"),
   },
   async (args) => handleAdbAppInfo(args)
+);
+
+server.tool(
+  "adb_uninstall",
+  "Uninstall an app from a connected device. Provides helpful error messages for common failures (device admin, system app, unknown package).",
+  {
+    packageName: z.string().describe("App package name to uninstall (e.g., com.example.app)"),
+    deviceId: z.string().optional().describe("Target device serial"),
+    keepData: z.boolean().optional().describe("Keep app data and cache after uninstall. Default: false."),
+  },
+  async (args) => handleAdbUninstall(args)
 );
 
 // --- Resources ---
