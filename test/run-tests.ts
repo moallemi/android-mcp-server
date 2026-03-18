@@ -374,6 +374,42 @@ async function runTests() {
   // --- adb_install ---
   console.log("\n── adb_install ──");
 
+  await test("installs a valid APK successfully", async () => {
+    const apkLocalPath = resolve(import.meta.dirname, "../test-install.apk");
+    if (existsSync(apkLocalPath)) unlinkSync(apkLocalPath);
+
+    // Find the APK path for a small system app (SettingsProvider is always present and small)
+    const pathResult = await callTool("adb_command", {
+      command: "shell pm path com.android.providers.settings",
+      deviceId,
+    });
+    const apkMatch = getTextContent(pathResult).match(/package:(\S+)/);
+    assert(apkMatch !== null, "Could not find SettingsProvider APK path on device");
+    const remoteApk = apkMatch![1];
+
+    // Pull the APK locally
+    const pullResult = await callTool("adb_file_transfer", {
+      direction: "pull",
+      localPath: apkLocalPath,
+      remotePath: remoteApk,
+      deviceId,
+    });
+    assert(!pullResult.isError, `Failed to pull APK: ${getTextContent(pullResult)}`);
+    assert(existsSync(apkLocalPath), "APK not pulled to local");
+
+    // Install it using adb_install
+    const installResult = await callTool("adb_install", {
+      apkPath: apkLocalPath,
+      deviceId,
+      options: ["-r", "-t", "-d"],
+    });
+    const text = getTextContent(installResult);
+    assert(text.includes("successfully"), `Install did not succeed: ${text}`);
+
+    // Clean up
+    unlinkSync(apkLocalPath);
+  });
+
   await test("returns helpful error for missing APK", async () => {
     const result = await callTool("adb_install", {
       apkPath: "/nonexistent/fake-app.apk",
