@@ -20,7 +20,7 @@ import { logger } from "./utils/logger.js";
 
 const server = new McpServer({
   name: "adb-mcp-server",
-  version: "0.1.0",
+  version: "1.0.0",
 });
 
 // --- Tools ---
@@ -184,7 +184,7 @@ server.resource(
 // --- Start ---
 
 async function main() {
-  logger.info("Starting ADB MCP Server v0.1.0");
+  logger.info("Starting ADB MCP Server v1.0.0");
   const transport = new StdioServerTransport();
   await server.connect(transport);
   logger.info("ADB MCP Server connected and ready");

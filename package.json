@@ -1,6 +1,6 @@
 {
-  "name": "android-mcp-server",
-  "version": "0.1.0",
+  "name": "@moallemi/android-mcp-server",
+  "version": "1.0.0",
   "description": "MCP server exposing Android Debug Bridge (ADB) to AI assistants",
   "type": "module",
   "main": "dist/index.js",
@@ -19,6 +19,7 @@
     "android",
     "debug"
   ],
+  "files": ["dist"],
   "license": "MIT",
   "engines": {
     "node": ">=18"
